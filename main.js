@@ -1,135 +1,130 @@
-import * as THREE from 'three'; 
+import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { OBJLoader } from 'three/examples/jsm/Addons.js';
-import { MTLLoader } from 'three/examples/jsm/Addons.js';
+// import { MTLLoader } from 'three/examples/jsm/Addons.js';
 
-const width = window.innerWidth, height = window.innerHeight;
+const width = window.innerWidth,
+  height = window.innerHeight;
 
 // init
 
-const camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
+const camera = new THREE.PerspectiveCamera(70, width / height, 0.01, 10);
 camera.position.x = 1;
 camera.position.y = 1;
 camera.position.z = 1;
-camera.lookAt(0,0,0);
+camera.lookAt(0, 0, 0);
 
 const scene = new THREE.Scene();
 
-const light = new THREE.PointLight( 0xff0000, 10, 100 );
-light.position.set( 5, 5, 5 );
-scene.add( light );
-const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-const material = new THREE.MeshPhongMaterial();
+const ambient = new THREE.AmbientLight(0xffffff);
+scene.add(ambient);
+// const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+// const material = new THREE.MeshPhongMaterial();
 
-const mesh = new THREE.Mesh( geometry, material );
-scene.add( mesh );
+// const mesh = new THREE.Mesh( geometry, material );
+// scene.add( mesh );
 
 const size = 10;
 const divisions = 50;
 
-const gridHelper = new THREE.GridHelper( size, divisions );
-scene.add( gridHelper );
+const gridHelper = new THREE.GridHelper(size, divisions);
+scene.add(gridHelper);
 let object;
+let object2;
+let objects = [];
 
 //manager
 
 function loadModel() {
+  // object.traverse( function ( child ) {
+  // 	console.log(child);
+  // 	console.log(texture);
+  // 	if ( child.isMesh ) {
+  // 		child.material.map = texture;
+  // 	}
 
-	object.traverse( function ( child ) {
-		console.log(child);
-		console.log(texture);
-		if ( child.isMesh ) {
-			child.material.map = texture;
-			// child.material.emissive = "0xff0000"
-			// child.material.color.set([0, 1, 0]);
-		}
+  // } );
+  // 	// object.
+  // 	// object.position.y = - 0.95;
+  // 	// object.scale.setScalar( 0.01 );
+  objects.map((obj) => scene.add(obj));
+  // scene.add( object2 );
+  // scene.add( object );
 
-	} );
-// 	// object.
-// 	// object.position.y = - 0.95;
-// 	// object.scale.setScalar( 0.01 );
-	scene.add( object );
-
-	render();
+  render();
 }
 
-const manager = new THREE.LoadingManager( loadModel );
+const manager = new THREE.LoadingManager(loadModel);
 
 // texture
 
-const textureLoader = new THREE.TextureLoader( manager );
-const texture = textureLoader.load( 'public/textures/uv_grid_opengl.jpg', render );
+const textureLoader = new THREE.TextureLoader(manager);
+const texture = textureLoader.load('public/textures/roof_texture.jpg', render);
 texture.colorSpace = THREE.SRGBColorSpace;
 
 // model
 
-function onProgress( xhr ) {
+function onLoad(obj) {
+  objects.push(obj);
+}
 
-	if ( xhr.lengthComputable ) {
-
-		const percentComplete = xhr.loaded / xhr.total * 100;
-		console.log( 'model ' + percentComplete.toFixed( 2 ) + '% downloaded' );
-
-	}
-
+function onProgress(xhr) {
+  if (xhr.lengthComputable) {
+    const percentComplete = (xhr.loaded / xhr.total) * 100;
+    console.log('model ' + percentComplete.toFixed(2) + '% downloaded');
+  }
 }
 
 function onError() {}
 
-const mttlLoader = new MTLLoader();
-mttlLoader.load('public/models/ruberoid_1000x1000x2.mtl', function ( mat ) {
-	// material = mat;
-	// scene.add(obj);
-}, onProgress, onError );
+// const mttlLoader = new MTLLoader();
+// mttlLoader.load('public/models/ruberoid_1000x1000x2.mtl', function ( mat ) {
+// 	// material = mat;
+// 	// scene.add(obj);
+// }, onProgress, onError );
 
-const objLoader = new OBJLoader( manager );
-objLoader.load( 'public/models/ruberoid_1000x1000x2.obj', function ( obj, materials ) {
-	object = obj;
-	// console.log(obj);
-	// obj.traverse( function ( child ) {
-	// 	console.log(child);
-	// 	if ( child.isMesh ) child.material.normalMap = roofTexture;
-
-	// } );
-
-	// scene.add(obj);
-}, onProgress, onError );
+const objLoader = new OBJLoader(manager);
+objLoader.load('public/models/roof_edge/roof_edge_1m.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/roof_edge/roof_edge_1m2.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/roof_edge/roof_edge_corner.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/roof_edge/roof_edge_corner2.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/lodge_150x50x1000.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/balk_150x150x1000.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/balk_150x150x2200.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/balk_corner.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/Lodge_20x200x1000.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/Lodge_20x190x1000_bevel.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/ruberoid_1000x1000x2.obj', onLoad, onProgress, onError);
 // objLoader.setMaterials(material)
 
-const renderer = new THREE.WebGLRenderer( { antialias: true } );
-renderer.setSize( width, height );
-renderer.setAnimationLoop( animate );
-document.body.appendChild( renderer.domElement );
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(width, height);
+renderer.setAnimationLoop(animate);
+document.body.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);	
+const controls = new OrbitControls(camera, renderer.domElement);
 controls.minDistance = 1;
 controls.maxDistance = 4;
-controls.addEventListener( 'change', render );
+controls.addEventListener('change', render);
 
-window.addEventListener( 'resize', onWindowResize );
+window.addEventListener('resize', onWindowResize);
 
 function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-
-	renderer.setSize( window.innerWidth, window.innerHeight );
-
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 // animation
 
-function animate( time ) {
+function animate(time) {
+  // mesh.rotation.x = time / 2000;
+  // mesh.rotation.y = time / 1000;
 
-	// mesh.rotation.x = time / 2000;
-	// mesh.rotation.y = time / 1000;
-
-	render();
-
+  render();
 }
 
 function render() {
-
-	renderer.render( scene, camera );
-
+  renderer.render(scene, camera);
 }
