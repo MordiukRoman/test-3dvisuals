@@ -105,7 +105,11 @@ function onCornerLoad(obj) {
 		const clone = obj.clone();
 		clone.position.x = point[0];
 		clone.position.z = point[1];
-		scene.add(clone);
+		const clone2 = obj.clone();
+		clone2.position.x = point[0];
+		clone2.position.z = point[1];
+		clone2.rotateY( Math.PI / 2 )
+		scene.add(clone, clone2);
 	}
 }
 
