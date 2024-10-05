@@ -34,15 +34,36 @@ scene.add(axesHelper);
 let object2;
 let objects = [];
 let count = 0;
-let balk_points = [
-  [-1.5, -2.5],
-  [1.5, -2.5],
-  [-1.5, 0],
-  [1.5, 0],
-  [-1.5, 2.5],
-  [1.5, 2.5],
+let balkPoints = [
+  [-1.5, 0, -2.5],
+  [1.5, 0, -2.5],
+  [-1.5, 0, 0],
+  [1.5, 0, 0],
+  [-1.5, 0, 2.5],
+  [1.5, 0, 2.5],
 ];
-
+let angles = [
+	[0, Math.PI * 1.5],
+	[Math.PI, Math.PI * 1.5],
+	[Math.PI / 2, Math.PI * 1.5],
+	[Math.PI / 2, Math.PI * 1.5],
+	[Math.PI / 2, 0],
+	[Math.PI / 2, Math.PI],
+];
+let balkCorners = balkPoints.reduce((prev, curr, ndx) => {
+  return [
+    ...prev,
+    {
+      position: curr,
+      rotation: angles[ndx][0],
+    },
+    {
+      position: curr,
+      rotation: angles[ndx][1],
+    },
+  ];
+}, []);
+console.log(balkCorners);
 //manager
 
 function loadModel() {
@@ -91,26 +112,23 @@ scene.add(plane);
 function onBalkLoad(obj) {
   obj.children[0].material.map = texture;
   obj.children[0].material.normalMap = normalMap;
-	for (const point of balk_points) {
-		const clone = obj.clone();
-		clone.position.x = point[0];
-		clone.position.z = point[1];
-		scene.add(clone);
-	}
+  for (const point of balkPoints) {
+    const clone = obj.clone();
+    clone.position.x = point[0];
+    clone.position.z = point[2];
+    scene.add(clone);
+  }
 }
 function onCornerLoad(obj) {
   obj.children[0].material.map = texture;
   obj.children[0].material.normalMap = normalMap;
-	for (const point of balk_points) {
-		const clone = obj.clone();
-		clone.position.x = point[0];
-		clone.position.z = point[1];
-		const clone2 = obj.clone();
-		clone2.position.x = point[0];
-		clone2.position.z = point[1];
-		clone2.rotateY( Math.PI / 2 )
-		scene.add(clone, clone2);
-	}
+  for (const corner of balkCorners) {
+    const clone = obj.clone();
+    clone.position.x = corner.position[0];
+    clone.position.z = corner.position[2];
+    clone.rotateY(corner.rotation);
+    scene.add(clone);
+  }
 }
 
 function onProgress(xhr) {
