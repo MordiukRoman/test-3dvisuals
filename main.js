@@ -31,10 +31,8 @@ const gridHelper = new THREE.GridHelper(size, divisions);
 scene.add(gridHelper);
 const axesHelper = new THREE.AxesHelper(2);
 scene.add(axesHelper);
-let object2;
-let objects = [];
-let count = 0;
-let balkPoints = [
+
+const balkPoints = [
   [-1.5, 0, -2.5],
   [1.5, 0, -2.5],
   [-1.5, 0, 0],
@@ -42,7 +40,7 @@ let balkPoints = [
   [-1.5, 0, 2.5],
   [1.5, 0, 2.5],
 ];
-let angles = [
+const angles = [
 	[0, Math.PI * 1.5],
 	[Math.PI, Math.PI * 1.5],
 	[Math.PI / 2, Math.PI * 1.5],
@@ -50,7 +48,7 @@ let angles = [
 	[Math.PI / 2, 0],
 	[Math.PI / 2, Math.PI],
 ];
-let balkCorners = balkPoints.reduce((prev, curr, ndx) => {
+const balkCorners = balkPoints.reduce((prev, curr, ndx) => {
   return [
     ...prev,
     {
@@ -63,29 +61,17 @@ let balkCorners = balkPoints.reduce((prev, curr, ndx) => {
     },
   ];
 }, []);
-console.log(balkCorners);
+let roofBalkPoints = [
+	[0, 0, -2.5],
+  [0, 0, -2.5],
+  [-1.5, 0, 0],
+  [1.5, 0, 0],
+  [0, 0, 2.5],
+  [0, 0, 2.5],
+]
 //manager
 
 function loadModel() {
-  // object && object.traverse( function ( child ) {
-  // 	// console.log(child);
-  // // 	console.log(texture);
-  // 	if ( child.isMesh ) {
-  // 		child.material.map = texture;
-
-  // 	}
-
-  // } );
-  // 	// object.
-  // 	// object.position.y = - 0.95;
-  // 	// object.scale.setScalar( 0.01 );
-  // objects.map((obj) => {
-  // 	console.log(count++)
-  // 	scene.add(obj)
-  // });
-  // scene.add( object2 );
-  // scene.add( object );
-
   render();
 }
 
@@ -131,6 +117,27 @@ function onCornerLoad(obj) {
   }
 }
 
+function onRoofBalkLoad(obj) {
+  obj.children[0].material.map = texture;
+  obj.children[0].material.normalMap = normalMap;
+  for (const point of roofBalkPoints) {
+    const clone = obj.clone();
+
+		if (point[2] === 0) {
+			clone.scale.set(5,1,1);
+			clone.rotateY(Math.PI / 2)
+			clone.position.x = point[0];
+			clone.position.z = point[2] + 2.5;
+		} else {
+			clone.scale.set(3,1,1);
+			clone.position.x = point[0] - 1.5;
+			clone.position.z = point[2];
+		}
+    clone.position.y = 2.1;
+    scene.add(clone);
+  }
+}
+
 function onProgress(xhr) {
   if (xhr.lengthComputable) {
     const percentComplete = (xhr.loaded / xhr.total) * 100;
@@ -152,7 +159,7 @@ const objLoader = new OBJLoader(manager);
 // objLoader.load('public/models/roof_edge/roof_edge_corner.obj', onLoad, onProgress, onError);
 // objLoader.load('public/models/roof_edge/roof_edge_corner2.obj', onLoad, onProgress, onError);
 // objLoader.load('public/models/lodge_150x50x1000.obj', onLoad, onProgress, onError);
-// objLoader.load('public/models/balk_150x150x1000.obj', onLoad, onProgress, onError);
+objLoader.load('public/models/balk_150x150x1000.obj', onRoofBalkLoad, onProgress, onError);
 objLoader.load('public/models/balk_150x150x2200.obj', onBalkLoad, onProgress, onError);
 objLoader.load('public/models/balk_corner.obj', onCornerLoad, onProgress, onError);
 // objLoader.load('public/models/Lodge_20x200x1000.obj', onLoad, onProgress, onError);
